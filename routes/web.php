@@ -22,6 +22,11 @@ Route::get('/user/auth/logout', [UserAuthController::class, 'userLogout'])->name
 Route::middleware(['auth','userAuth:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminViewPageController::class, 'viewAdminDashboard'])->name('admin.dashboard.page');
 
+    Route::get('/admin/profilePage', [AdminViewPageController::class, 'viewProfilePage'])->name('admin.profile.page');
+    Route::post('/admin/editProfile', [AdminManipulationController::class, 'updateProfile'])->name('admin.update.profile');
+    Route::post('/admin/updateProfilePassword', [AdminManipulationController::class, 'updatePassword'])->name('admin.update.password.profile');
+    Route::get('/admin/deleteProfileAccount/{id}', [AdminManipulationController::class, 'deleteAccount'])->name('admin.delete.account.profile');
+
     Route::get('/admin/allUsersPage', [AdminViewPageController::class, 'viewUsersPage'])->name('admin.view.users.page');
     Route::post('/admin/addUser', [AdminManipulationController::class, 'adminAddUser'])->name('addUser');
     Route::get('/admin/deleteUser/{id}', [AdminManipulationController::class, 'adminDeleteUser'])->name('admin.delete.user');
@@ -48,8 +53,23 @@ Route::middleware(['auth','userAuth:admin'])->group(function () {
     Route::post('/admin/editLeader', [AdminManipulationController::class, 'adminEditLeader'])->name('admin.edit.leader');
     Route::get('/admin/deleteLeader/{id}', [AdminManipulationController::class, 'adminDeleteLeader'])->name('admin.delete.leader');
 
-});
+    Route::get('/admin/announcementsPage', [AdminViewPageController::class, 'adminViewAnnouncementsPage'])->name('admin.announcements.page');
+    Route::post('/admin/addAnnouncementsPage', [AdminManipulationController::class, 'adminAddAnnouncement'])->name('addAnnouncement');
+    Route::post('/admin/editAnnouncement', [AdminManipulationController::class, 'adminEditAnnouncement'])->name('admin.edit.announcement');
+    Route::get('/admin/deleteAnnouncement/{id}', [AdminManipulationController::class, 'adminDeleteAnnouncement'])->name('admin.delete.announcement');
 
+    Route::get('/admin/baptismsPage', [AdminViewPageController::class, 'adminViewBaptismsPage'])->name('admin.baptisms.page');
+    Route::post('/admin/addBaptismPage', [AdminManipulationController::class, 'adminAddBaptism'])->name('admin.add.baptism');
+    Route::post('/admin/editBaptism', [AdminManipulationController::class, 'adminEditBaptism'])->name('admin.edit.baptism');
+    Route::get('/admin/deleteBaptism/{id}', [AdminManipulationController::class, 'adminDeleteBaptism'])->name('admin.delete.baptism');
+
+    Route::get('/admin/pledgesPage', [AdminViewPageController::class, 'adminViewPledgePage'])->name('admin.pledges.page');
+    Route::post('/admin/addPledgePage', [AdminManipulationController::class, 'adminAddPledge'])->name('admin.add.pledge');
+    Route::post('/admin/editPledge', [AdminManipulationController::class, 'adminEditPledge'])->name('admin.edit.pledge');
+    Route::get('/admin/deletePledge/{id}', [AdminManipulationController::class, 'adminDeletePledge'])->name('admin.delete.pledge');
+
+    Route::get('/admin/attendanceDonation', [AdminViewPageController::class, 'adminViewAttendanceDonationPage'])->name('admin.attendance.donation.page');
+});
 
 Route::middleware(['auth', 'userAuth:katibu'])->group(function () {
 

@@ -41,4 +41,8 @@ class Group extends Model
     public function leader(){
         return $this->hasMany(Leader::class);
     }
+
+    public function attendanceDonation(){
+        return $this->hasMany(AttendanceDonation::class);
+    }
 }

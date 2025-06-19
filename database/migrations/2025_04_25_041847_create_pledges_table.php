@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leaders', function (Blueprint $table) {
+        Schema::create('pledges', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('member_id')->constrained('members')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('group_id')->nullable()->constrained('groups')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('leader_position_id')->constrained('leader_positions')->onDelete('cascade')->onUpdate('cascade');
-            $table->string('status')->default('Active');
+            $table->foreignId('member_id')->constrained('members', 'id')->onDelete('cascade');
+            $table->string('amount');
+            $table->string('fulfilled_amount')->nullable();
+            $table->date('pledge_date')->nullable();
+            $table->date('end_date')->nullable();
+            $table->string('type')->nullable();
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -27,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leaders');
+        Schema::dropIfExists('pledges');
     }
 };

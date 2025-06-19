@@ -1,7 +1,7 @@
 @include('includes.dashboardHeader')
 @include('includes.notifications_alert')
 
-<title> Mfumo wa Parokia | Viongozi</title>
+<title> Mfumo wa Parokia | Ubatizo</title>
 
 
 <!--begin::Body-->
@@ -37,8 +37,8 @@
             </ul>
             <!--end::Start Navbar Links-->
 
-            <!--begin::End Navbar Links-->
 
+            <!--begin::End Navbar Links-->
             <ul class="navbar-nav ms-auto">
 
                 <!--begin::Fullscreen Toggle-->
@@ -68,7 +68,7 @@
                             </span>
                             <p class="d-flex flex-column align-items-start text-light mx-2" style="margin-bottom: 10px;">
                                 {{ $user->name }}
-                                <small style="color: rgba(245,245,245,0.7);">{{ $user->user_type }}</small>
+                                <small style="color: rgba(245,245,245,0.7);">{{ Str::title($user->user_type)  }}</small>
                             </p>
                         </li>
                         <!--end::User Image-->
@@ -192,7 +192,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.leaders.page') }}" class="nav-link active">
+                                <a href="{{ route('admin.leaders.page') }}" class="nav-link">
                                     <span class="mx-3"></span>
                                     <i class="bi bi-briefcase-fill"></i>
                                     <p>
@@ -228,7 +228,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.baptisms.page') }}" class="nav-link">
+                                <a href="{{ route('admin.baptisms.page') }}" class="nav-link active">
                                     <span class="mx-3"></span>
                                     <i class="bi bi-stars"></i>
                                     <p>
@@ -297,14 +297,14 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item fs-6">Viongozi</li>
+                            <li class="breadcrumb-item fs-6">Ubatizo</li>
                             <li class="breadcrumb-item active fs-6" aria-current="page">Orodha</li>
                         </ol>
-                        <h3 class="mb-0 float-bold">Viongozi</h3>
+                        <h3 class="mb-0 float-bold">Ubatizo</h3>
                     </div>
                     <div class="col-sm-6">
                         <div style="padding: 14px 0"></div>
-                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addLeaderModal"> Ongeza Kiongozi</button>
+                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addBaptismModal"> Ongeza Ubatizo</button>
                     </div>
                 </div>
                 <!--end::Row-->
@@ -321,13 +321,13 @@
                 <!--begin::Row-->
                 <div class="row">
                     <div class="card p-3 rounded-2">
-                        @if($leaders->isEmpty())
+                        @if($baptisms->isEmpty())
                             <div class="container p-5 d-flex flex-column align-items-center justify-content-center" style="background-color: #cccccc20;">
                                 <x-heroicon-o-inbox class="text-danger mb-4" style="height: 50px; width: 50px;" />
-                                <h5 class="fw-semibold fst-italic fs-6">Viongozi Hakuna, Jaribu Kuongeza</h5>
+                                <h5 class="fw-semibold fst-italic fs-6">Hakuna Ubatizo, Jaribu Kuongeza</h5>
                             </div>
                         @else
-                            <livewire:leaders-table />
+                            <livewire:baptisms-table />
                         @endif
                     </div>
                 </div>
@@ -352,53 +352,70 @@
     </footer>
     <!--end::Footer-->
 
-    <!-- Modal - ADMIN LEADER REGISTER -->
-    <div class="modal fade" id="addLeaderModal" tabindex="-1" aria-labelledby="addLeaderModalLabel" aria-hidden="true">
+
+
+    <!-- Modal - ADMIN  REGISTER -->
+    <div class="modal fade" id="addBaptismModal" tabindex="-1" aria-labelledby="addBaptismModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="{{ route('admin.add.leader') }}" method="POST" x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
+                <form action="{{ route('admin.add.baptism') }}" method="POST" x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
                     @csrf
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="addLeaderModalLabel">Ongeza Kiongozi</h1>
+                        <h1 class="modal-title fs-5" id="addBaptismModalLabel">Ongeza Ubatizo</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-                        <livewire:check-member-id />
+                        <livewire:baptism-parents-check-id />
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="baby_firstname" class="form-label">Jina la Kwanza (Mtoto)</label>
+                                    <input type="text" class="form-control" value="{{ old('baby_firstname') }}" name="baby_firstname" id="baby_firstname" placeholder="Ingiza jina la kwanza la mtoto...">
+                                    @error('baby_firstname') <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="baby_middlename" class="form-label">Jina la Kati (Mtoto)</label>
+                                    <input type="text" class="form-control" value="{{ old('baby_middlename') }}" name="baby_middlename" id="baby_middlename" placeholder="Ingiza jina la kati la mtoto...">
+                                    @error('baby_middlename') <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="baby_lastname" class="form-label">Jina la Mwisho (Mtoto)</label>
+                                    <input type="text" class="form-control" name="baby_lastname" value="{{ old('baby_lastname') }}" id="baby_lastname" placeholder="Ingiza jina la mwisho la mtoto...">
+                                    @error('baby_lastname') <span class="text-danger">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="leader_position_id" class="form-label">Nafasi ya Kiongozi</label>
-                                    <select name="leader_position_id" id="leader_position_id" class="form-select">
-                                        <option value="">--chagua nafasi--</option>
-                                        @foreach($leaderPositions as $position)
-                                            <option value="{{ $position->id }}">{{ $position->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('leader_position_id') <span class="text-danger">{{ $message }}</span> @enderror
+                                    <label for="dateOfBirth" class="form-label">Tarehe ya Kuzaliwa (Mtoto)</label>
+                                    <input type="date" class="form-control" value="{{ old('dateOfBirth') }}" name="dateOfBirth" id="dateOfBirth" placeholder="Ingiza tarehe ya kuzaliwa ya mtoto...">
+                                    @error('dateOfBirth') <span class="text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="group_id" class="form-label">Kikundi</label>
-                                    <select name="group_id" id="group_id" class="form-select">
-                                        <option value="">--chagua kikundi--</option>
-                                        @foreach($groups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('group_id') <span class="text-danger">{{ $message }}</span> @enderror
+                                    <label for="dateOfBaptism" class="form-label">Tarehe ya Kubatizwa (Mtoto)</label>
+                                    <input type="date" class="form-control" value="{{ old('dateOfBaptism') }}" name="dateOfBaptism" id="dateOfBaptism" placeholder="Ingiza tarehe ya kubatizwa kwa mtoto...">
+                                    @error('dateOfBaptism') <span class="text-danger">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                         </div>
+
                         <div class="mb-3">
                             <label for="status" class="form-label">Hali</label>
                             <select name="status" id="status" class="form-select">
                                 <option value="">-- chagua hali --</option>
-                                <option value="Hai">Hai</option>
-                                <option value="Siohai">Siohai</option>
+                                <option value="Hai" {{ old('status') == 'Hai' ? 'selected' : '' }}>Hai</option>
+                                <option value="Siohai" {{ old('status') == 'Siohai' ? 'selected' : '' }}>Siohai</option>
                             </select>
                             @error('status') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
@@ -411,7 +428,7 @@
                             <!-- Spinner shown only when loading -->
                             <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
                                   aria-hidden="true"></span>
-                            <span>Ongeza Kiongozi</span>
+                            <span>Ongeza Ubatizo</span>
                         </button>
                     </div>
                 </form>

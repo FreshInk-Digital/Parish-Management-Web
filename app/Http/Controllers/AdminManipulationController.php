@@ -2,20 +2,108 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Announcement;
+use App\Models\Baptism;
 use App\Models\Group;
 use App\Models\Leader;
 use App\Models\LeaderPosition;
 use App\Models\Member;
+use App\Models\Pledge;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminManipulationController extends Controller
 {
+
+    // ********************************************** start PROFILE ***********************************************
+    
+    public function updateProfile(Request $request)
+    {
+        $validatedData = $request->validate([
+            'id' => 'required',
+            'firstname' => 'required|min:2|max:20',
+            'lastname' => 'required|min:2|max:20',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($request->id)],
+            'phone' => ['required', Rule::unique('users', 'phone')->ignore($request->id)],
+            'user_type' => 'required',
+        ],[
+            'firstname.required' => 'Jina la kwanza linahitajika',
+            'firstname.min' => 'Jina la kwanza Angalau liwe herufi 2',
+            'firstname.max' => 'Jina la kwanza liwe herufi 20',
+            'lastname.required' => 'Jina la Mwisho linahitajika',
+            'lastname.min' => 'Jina la Mwisho Angalau liwe herufi 2',
+            'lastname.max' => 'Jina la Mwisho liwe herufi 20',
+            'email.required' => 'Barua pepe inahitajika',
+            'email.email' => 'Mtindo sio wa barua pepe (example@gmal.com)',
+            'email.unique' => 'Barua pepe imeshatumika',
+            'phone.required' => 'Namba ya Simu inahitajika',
+            'phone.unique' => 'Namba ya Simu imeshatumika',
+            'user_type.required' => 'Aina ya Mhusika inahitajika',
+        ]);
+
+        $user = User::findOrFail($validatedData['id']);
+
+        if(!$user){
+            return redirect()->back()->with('error', 'Mhusika Hajapatikana');
+        }
+
+        $validatedData['firstname'] = Str::title(Str::lower($validatedData['firstname']));
+        $validatedData['lastname'] = Str::title(Str::lower($validatedData['lastname']));
+        $validatedData['name'] = $validatedData['firstname'] . ' ' . $validatedData['lastname'];
+
+        $user->update($validatedData);
+
+        return redirect()->back()->with('success', 'Wasifu Umehaririwa Kikamilifu');
+    }
+    
+    public function updatePassword(Request $request){
+        $validated = $request->validate([
+            'id'                        => 'required|exists:users,id',
+            'old_password'              => 'required',
+            'password'                  => 'required|min:8|max:30',
+            'confirm_password'          => 'required'
+        ]);
+
+        $user = User::findOrFail($validated['id']);
+
+        if($validated['password'] != $validated['confirm_password']){
+            return redirect()->back()->with('error', 'Neno Siri na Thibitisho Havifanani')->withInput();
+        }
+
+        if(!Hash::check($validated['old_password'], $user->password)){
+            return redirect()->back()->with('error', 'Neno Siri la Zamani si sahihi')->withInput();
+        }
+
+        $validated['password'] = Hash::make($validated['password']);
+
+        $user->update([
+            'password' => $validated['password']
+        ]);
+
+        return redirect()->back()->with('success', 'Neno siri limehaririwa kikamilifu');
+    }
+
+    public function deleteAccount($id){
+        $user = User::findOrFail($id);
+        if($user->user_type == 'admin'){
+            $admins = User::where('user_type', 'admin')->get();
+            if($admins->count() == 1){
+                return redirect()->back()->with('error', '[Admin uko pekeako], atengenezwe Admin mwingne iliujifute');
+            }
+        }
+
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Akaunti imefutwa Kikamilifu');
+    }
+    // ********************************************** end PROFILE *********************************** 
+
+
 
     // *************************************************** start USER ********************************************
     public  function adminAddUser(Request $request)
@@ -26,6 +114,7 @@ class AdminManipulationController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|unique:users,phone',
             'user_type' => 'required',
+            'branch' => 'required',
             'password' => 'required|min:8|max:20'
         ],[
             'firstname.required' => 'Jina la kwanza linahitajika',
@@ -59,8 +148,8 @@ class AdminManipulationController extends Controller
             'id' => 'required',
             'firstname' => 'required|min:2|max:20',
             'lastname' => 'required|min:2|max:20',
-            'email' => 'required|email',
-            'phone' => 'required',
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($request->id)],
+            'phone' => ['required', Rule::unique('users', 'phone')->ignore($request->id)],
             'user_type' => 'required',
         ],[
             'firstname.required' => 'Jina la kwanza linahitajika',
@@ -74,7 +163,7 @@ class AdminManipulationController extends Controller
             'email.unique' => 'Barua pepe imeshatumika',
             'phone.required' => 'Namba ya Simu inahitajika',
             'phone.unique' => 'Namba ya Simu imeshatumika',
-            'user_type.required' => 'Aina ya Mhusika inahitajika'
+            'user_type.required' => 'Aina ya Mhusika inahitajika',
         ]);
 
         $user = User::find($validatedData['id']);
@@ -94,7 +183,14 @@ class AdminManipulationController extends Controller
 
     public function adminDeleteUser($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
+        if($user->user_type == 'admin'){
+            $admins = User::where('user_type', 'admin')->get();
+            if($admins->count() == 1){
+                return redirect()->back()->with('error', '[Admin uko pekeako], tengeneza Admin mwingne iliujifute');
+            }
+        }
+
         $user->delete();
 
         return redirect()->back()->with('success', 'Mhusika Amefutwa Kikamilifu');
@@ -341,6 +437,7 @@ class AdminManipulationController extends Controller
 
 
 
+
     // ******************************************* start LEADER ****************************************************
     public function adminAddLeader(Request $request)
     {
@@ -363,13 +460,16 @@ class AdminManipulationController extends Controller
 
         $validated['member_id'] = Str::trim($validated['member_id']);
 
-        $leader = Leader::where('member_id', $validated['member_id'])->get();
+        // Leader -> member_id => contains member->id ...not member_id
+        $member = Member::where('member_id', $validated['member_id'])->first();
+        $validated['member_id'] = $member->id;
+        $leader = Leader::where('member_id', $validated['member_id'])->first();
 
-        if($leader->leader_position_id == $validated['leader_position_id'] && $leader->member_id == $validated['member_id']){
-            return redirect()->back()->with('error', 'Kiongozi ashasajiliwa na hii nafasi');
+        if(!empty($leader)){
+            if($leader->leader_position_id == $validated['leader_position_id'] && $leader->member_id == $validated['member_id']){
+                return redirect()->back()->with('error', 'Kiongozi ashasajiliwa na hii nafasi');
+            }
         }
-
-        dd($validated);
 
         Leader::create($validated);
 
@@ -381,7 +481,7 @@ class AdminManipulationController extends Controller
         $validated = $request->validate([
             'id'                            => 'required',
             'user_id'                       => 'required',
-            'member_id'                     => 'required|max:8|exists:members,member_id',
+            'member_id'                     => 'required|max:8|exists:members,id',
             'group_id'                      => 'required|exists:groups,id',
             'leader_position_id'            => ['required', 'exists:leader_positions,id', Rule::unique('leaders', 'leader_positions_id')->ignore($request->leader_position_id)],
             'status'                        => 'required',
@@ -420,4 +520,252 @@ class AdminManipulationController extends Controller
     }
 
     // ********************************************* end LEADER ****************************************************
+
+
+
+
+
+    // ********************************************* start ANNOUNCEMENTS ********************************************
+    public function adminAddAnnouncement(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'announcement_type' => 'required',
+            'description' => 'required|string',
+            'announcement_asset' => 'required|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+        ], [
+            'announcement_type.required' => 'Aina ya taarifa inahitajika.',
+            'description.required' => 'Maelezo ya taarifa yanahitajika.',
+            'description.string' => 'Maelezo lazima yawe maandishi.',
+            'announcement_asset.required' => 'Tafadhali weka faili la taarifa.',
+            'announcement_asset.file' => 'Faili lazima liwe halali.',
+            'announcement_asset.mimes' => 'Faili linapaswa kuwa aina ya: jpg, jpeg, png, pdf, doc, au docx.',
+        ]);
+
+        $extension = $request->file('announcement_asset')->getClientOriginalExtension();
+        $filename = 'announcement_' . now()->format('Ymd') . '_' . rand(1000, 9999) . '.' . $extension;
+        $filePath = $request->file('announcement_asset')->storeAs('announcements', $filename, 'public');
+        $validated['announcement_asset'] = $filePath;
+
+        Announcement::create($validated);
+
+        return redirect()->back()->with('success', 'Tangazo limeongezwa kikamilifu');
+    }
+
+
+    public function adminEditAnnouncement(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required',
+            'user_id' => 'required|exists:users,id',
+            'announcement_type' => 'required',
+            'old_announcement_asset' => 'required',
+            'description' => 'required|string',
+            'announcement_asset' => 'nullable|file|mimes:jpg,jpeg,png,pdf,doc,docx',
+        ], [
+            'announcement_type.required' => 'Aina ya taarifa inahitajika.',
+            'description.required' => 'Maelezo ya taarifa yanahitajika.',
+            'description.string' => 'Maelezo lazima yawe maandishi.',
+            'announcement_asset.file' => 'Faili Jipya lazima liwe halali.',
+            'announcement_asset.mimes' => 'Faili Jipya linapaswa kuwa aina ya: jpg, jpeg, png, pdf, doc, au docx.',
+        ]);
+
+        $announcement = Announcement::findOrFail($validated['id']);
+
+        if($request->has('announcement_asset')){
+            $extension = $request->file('announcement_asset')->getClientOriginalExtension();
+            $filename = 'announcement_' . now()->format('Ymd') . '_' . rand(1000, 9999) . '.' . $extension;
+            $filePath = $request->file('announcement_asset')->storeAs('announcements', $filename, 'public');
+            $validated['announcement_asset'] = $filePath;
+
+            Storage::disk('public')->delete($validated['old_announcement_asset']);
+        }else{
+            $validated['announcement_asset'] = $validated['old_announcement_asset'];
+        }
+
+        $announcement->update([
+            'user_id'                   => $validated['user_id'],
+            'announcement_type'         => $validated['announcement_type'],
+            'announcement_asset'        => $validated['announcement_asset'],
+            'description'               => $validated['description']
+        ]);
+
+        return redirect()->back()->with('success', 'Tangazo limehaririwa kikamilifu');
+    }
+
+    public function adminDeleteAnnouncement($id)
+    {
+        $announcement = Announcement::findOrFail($id);
+        $asset = $announcement->announcement_asset;
+    
+        if ($asset == null) {
+            return redirect()->back()->with('error', 'Faili la Tangazo halipo');
+        }
+    
+        Storage::disk('public')->delete($asset);
+    
+        $announcement->delete();
+    
+        return redirect()->back()->with('success', 'Tangazo limefutwa kikamilifu');
+    }
+
+    // ********************************************* end ANNOUNCEMENTS **********************************************
+
+
+
+
+    // ********************************************* start BAPTISM **********************************************
+    public function adminAddBaptism(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id'                   => 'required|exists:users,id',
+            'father_member_id'          => 'required|exists:members,member_id',
+            'mother_member_id'          => 'required|exists:members,member_id',
+            'baby_firstname'            => 'required|string',
+            'baby_middlename'           => 'required|string',
+            'baby_lastname'             => 'required|string',
+            'dateOfBirth'               => 'required',
+            'dateOfBaptism'             => 'required',
+            'status'                    => 'required'
+        ], [
+            'father_member_id.required' => 'Ingiza namba ya mshirika (Baba)',
+            'mother_member_id.required' => 'Ingiza namba ya mshirika (Mama)',
+            'mother_member_id.exists'   => 'Namba ya mshirika (Mama) haipo',
+            'father_member_id.exists'   => 'Namba ya mshirika (Baba) haipo',
+            'baby_firstname.required'   => 'Ingiza Jina la kwanza',
+            'baby_middlename.required'  => 'Ingiza Jina la Kati',
+            'baby_lastname.required'    => 'Ingiza Jina la Mwisho',
+            'dateOfBirth.required'      => 'Ingiza tarehe ya kuzaliwa',
+            'dateOfBaptism.required'    => 'Ingiza tarehe ya kubatizwa',
+            'status.required'           => 'Ingiza hali'
+        ]);
+
+        $father = Member::where('member_id', $validated['father_member_id'])
+                        ->where('sex', 'Mwanaume')
+                        ->first();
+
+        $mother = Member::where('member_id', $validated['mother_member_id'])
+                        ->where('sex', 'Mwanamke')
+                        ->first();
+
+        if($father == null){
+            return redirect()->back()->with('error', 'Namba ya mshirika ya baba si Mwanaume')->withInput();
+        }
+
+        if($mother == null){
+            return redirect()->back()->with('error', 'Namba ya mshirika ya mama si Mwanamke')->withInput();
+        }
+
+        $validated['father_member_id'] = $father->id;
+        $validated['mother_member_id'] = $mother->id;
+
+        $validated['baby_firstname'] = Str::title(Str::lower($validated['baby_firstname']));
+        $validated['baby_middlename'] = Str::title(Str::lower($validated['baby_middlename']));
+        $validated['baby_lastname'] = Str::title(Str::lower($validated['baby_lastname']));
+
+
+        $validated['age'] = $this->displayAge($validated['dateOfBirth'], $validated['dateOfBaptism']);
+
+        Baptism::create($validated);
+
+        return redirect()->back()->with('success', 'Ubatizo umeongezwa kikamilifu');
+    }
+
+    public function adminEditBaptism(Request $request)
+    {
+
+    }
+
+    public function adminDeleteBaptism($id)
+    {
+        $baptism = Baptism::findOrFail($id);
+        $baptism->delete();
+
+        return redirect()->back()->with('success', 'Ubatizo umefutwa kikamilifu');
+    }
+
+    // calculate the Age of a child
+    public function displayAge($birthDate, $baptismDate)
+    {
+        $age = Carbon::parse($birthDate)->diff($baptismDate);
+
+        if ($age->y == 0){
+            if($age->m > 1){
+                return 'miezi ' . $age->m;
+            }else{
+                return 'mwezi ' . $age->m;
+            }
+        }
+        else{
+            if($age->y == 1){
+                if($age->m > 1){
+                    return 'mwaka '.  $age->y . ' na miezi '. $age->m;
+                }else{
+                    return 'mwaka '.  $age->y . ' na mwezi '. $age->m;
+                }
+            }else{
+                if($age->y > 4){
+                    return 'miaka '.  $age->y;
+                }else{
+                    if($age->m > 1){
+                        return 'miaka '.  $age->y . ' na miezi '. $age->m;
+                    }else{
+                        return 'miaka '.  $age->y . ' na mwezi '. $age->m;
+                    }
+                }
+            }
+        }
+    }
+    // ********************************************* end BAPTISM **********************************************
+
+
+
+
+
+    // *********************************************** start PLEDGE ********************************************
+
+    public function adminAddPledge(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id'                   => 'required|exists:users,id',
+            'member_id'                 => 'required|exists:members,member_id',
+            'status'                    => 'required',
+            'pledge_date'               => 'required|date',
+            'end_date'                  => 'nullable|date',
+            'amount'                    => 'required|string',
+            'fulfilled_amount'          => 'required|string',
+            'type'                      => 'required',
+        ], [
+            'member_id.required'        => 'Ingiza namba ya mshirika',
+            'member_id.exists'          => 'Namba haipo',
+            'amount.required'           => 'Weka kiasi',
+            'fulfilled_amount.required' => 'Weka kiasi kilichotolewa',
+            'status.required'           => 'Weka hali',
+            'pledge_date.required'      => 'Weka tarehe ya ahadi',
+            'type.required'             => 'Weka aina ya ahadi'
+        ]);
+
+        $member = Member::where('member_id', $validated['member_id'])->first();
+        $validated['member_id'] = $member->id;
+
+        Pledge::create($validated);
+
+        return redirect()->back()->with('success', 'Ahadi imetengenezwa kikamilifu');
+    } 
+
+    public function adminEditPledge(){
+        
+    }
+
+    public function adminDeletePledge($id){
+        $pledge = Pledge::findOrFail($id);
+        $pledge->delete();
+
+        return redirect()->back()->with('success', 'Ahadi imefutwa kikamilifu');
+    }
+    // *********************************************** end PLEDGE ***********************************************
+
+
+
+
 }

@@ -26,7 +26,7 @@
             </p>
             <a href="{{ route('login') }}" class="btn btn-primary">
                 <div class="inline-block items-center text-white font-bold py-1 px-2 rounded">
-                    Anza Sasa <i class="bi bi-arrow-right"></i>
+                    Ingia Sasa <i class="bi bi-arrow-right"></i>
                 </div>
             </a>
         </div>

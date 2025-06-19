@@ -9,15 +9,20 @@ class UserAuthController extends Controller
 {
     public function userLogin(Request $request){
         $validatedData = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'min:8', 'max:30']
+            'phone' => ['required'],
+            'password' => ['required', 'min:8', 'max:30'],
+            'confirm_password' => ['required'],
         ], [
-            'email.email' => 'Mtindo sio wa barua pepe (example@gmal.com)',
-            'email.required' => 'Barua pepe inahitajika',
-            'password.required' => 'Neno siri linahitajika',
+            'phone.required' => 'Ingiza Namba ya simu',
+            'password.required' => 'Ingiza Neno siri',
+            'confirm_password.required' => 'Ingiza Uthibitisho wa Neno siri',
             'password.min' => 'Neno siri angalau liwe herufi 8',
             'password.max' => 'Neno siri liwe herufi chini ya 30',
         ]);
+
+        if($validatedData['password'] != $validatedData['confirm_password']){
+            return redirect()->back()->with('error', 'Neno siri na Uthibitisho havifanani')->withInput();
+        }
 
         // Attempt to authenticate
         if (Auth::attempt($validatedData)) {
@@ -29,10 +34,8 @@ class UserAuthController extends Controller
                 return redirect('/katibu/test');
             }
 
-            // session()->flash('success', 'User Login Successfully');
         } else {
-            // session()->flash('error', 'User Login Failed');
-            return redirect()->back()->withInput()->with('error', 'Mhusika Ameshindwa Kuingia (Angalia Barua Pepe au Neno Siri)');
+            return redirect()->back()->withInput()->with('error', 'Mhusika Ameshindwa Kuingia (Barua Pepe au Neno Siri Sisahihi)');
         }
 
     }

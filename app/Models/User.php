@@ -27,6 +27,15 @@ class User extends Authenticatable
         'password',
     ];
 
+    static public function types(){
+        return [
+            'admin'     => 'Admin',
+            'katibu'    => 'Katibu',
+            'mchungaji' => 'Mchungaji',
+            'mwasibu'   => 'Mwasibu'
+        ];
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -90,5 +99,9 @@ class User extends Authenticatable
     public function message()
     {
         return $this->hasMany(Message::class);
+    }
+
+    public function attendanceDonation(){
+        return $this->hasMany(AttendanceDonation::class);
     }
 }

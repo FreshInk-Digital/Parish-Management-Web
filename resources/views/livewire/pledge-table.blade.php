@@ -50,16 +50,16 @@
                         <option value="100">100</option>
                     </select>
 
-                    @if(count($selectedLeaders) > 1)
+                    @if(count($selectedPledges) > 1)
                         <!-- Delete button only visible on md+ -->
                         <button class="btn btn-danger d-none d-md-block" data-bs-toggle="modal"
-                                data-bs-target="#deleteSelectedLeaderModal">
+                                data-bs-target="#deleteSelectedPledgeModal">
                             <i class="bi bi-trash text-light"></i> Futa Zote
                         </button>
-                    @elseif(count($selectedLeaders) == 1)
+                    @elseif(count($selectedPledges) == 1)
                         <!-- Delete button only visible on md+ -->
                         <button class="btn btn-danger d-none d-md-block" data-bs-toggle="modal"
-                                data-bs-target="#deleteSelectedLeaderModal">
+                                data-bs-target="#deleteSelectedPledgeModal">
                             <i class="bi bi-trash text-light"></i> Futa
                         </button>
                     @endif
@@ -88,19 +88,19 @@
                         <ul class="dropdown-menu dropdown-menu-end">
 
                             <!-- Only show Futa Zote inside dropdown on sm -->
-                            @if(count($selectedLeaders) > 1)
+                            @if(count($selectedPledges) > 1)
                                 <!-- Delete button only visible on md+ -->
                                 <li class="d-md-none">
                                     <a class="dropdown-item text-danger" href="#" style="cursor: pointer;"
-                                       data-bs-toggle="modal" data-bs-target="#deleteSelectedLeaderModal">
+                                       data-bs-toggle="modal" data-bs-target="#deleteSelectedPledgeModal">
                                         <i class="bi bi-trash-fill me-1"></i> Futa Zote
                                     </a>
                                 </li>
-                            @elseif(count($selectedLeaders) == 1)
+                            @elseif(count($selectedPledges) == 1)
                                 <!-- Delete button only visible on md+ -->
                                 <li class="d-md-none">
                                     <a class="dropdown-item text-danger" href="#" style="cursor: pointer;"
-                                       data-bs-toggle="modal" data-bs-target="#deleteSelectedLeaderModal">
+                                       data-bs-toggle="modal" data-bs-target="#deleteSelectedPledgeModal">
                                         <i class="bi bi-trash-fill me-1"></i> Futa
                                     </a>
                                 </li>
@@ -133,40 +133,50 @@
                            value="select-all-">
                 </th>
                 <th>#</th>
-                <th>Namba ya Mshirika</th>
                 <th>Jina Kamili</th>
-                <th>Nafasi</th>
-                <th>Kiongozi</th>
-                <th>Alie Unda</th>
-                <th>Hali ya Kiongozi</th>
+                <th>Aina</th>
+                <th>Kiasi (Tshs)</th>
+                <th>Kilichotolewa (Tshs)</th>
+                <th>Kilichobaki (Tshs)</th>
+                <th>Tarehe ya Ahadi</th>
+                <th>Tarehe ya Mwisho</th>
+                <th>Hali</th>
                 <th>Tarehe ya Kuundwa</th>
                 <th>Vitendo</th>
             </tr>
             </thead>
             <tbody>
             @php
-                $id = $leaders->firstItem();
+                $id = $pledges->firstItem();
             @endphp
-            @forelse($leaders as $leader)
-                <tr class="py-2" wire:key="leader-{{ $leader->id }}">
+            @forelse($pledges as $pledge)
+                <tr class="py-2" wire:key="Pledge-{{ $pledge->id }}">
                     <td>
-                        <input wire:model.live="selectedLeaders" type="checkbox" id="bulk-select"
-                               value="{{ $leader->id }}">
+                        <input wire:model.live="selectedPledges" type="checkbox" id="bulk-select"
+                               value="{{ $pledge->id }}">
                     </td>
                     <td>{{ $id++ }}</td>
-                    <td>{{ $leader->member->member_id }}</td>
-                    <td>{{ $leader->member->firstname .' '. $leader->member->middlename .' '. $leader->member->lastname  }}</td>
-                    <td>{{ $leader->leaderPosition->name }}</td>
-                    <td>{{ $leader->group->name }}</td>
-                    <td>{{ $leader->user->name .' ('. Str::title($leader->user->user_type) .')' }}</td>
+                    <td>{{ $pledge->member->firstname .' '. $pledge->member->middlename .' '. $pledge->member->lastname  }}</td>
+                    <td>{{ $pledge->type }}</td>
+                    <td>{{ number_format((float) $pledge->amount, 2) }}</td>
+                    <td>{{ number_format((float) $pledge->fulfilled_amount, 2) }}</td>
+                    <td>{{ number_format((float) ($pledge->amount - $pledge->fulfilled_amount), 2) }}</td>
+                    <td>{{ $pledge->pledge_date }}</td>
                     <td>
-                        @if($leader->status == 'Hai')
-                            <span class="badge text-bg-success rounded-full">Hai</span>
+                        @if ($pledge->end_date == null)
+                            <p class="text-muted fst-italic">null</p>
                         @else
-                            <span class="badge text-bg-danger rounded-full">Siohai</span>
+                            {{ $pledge->end_date }}
                         @endif
                     </td>
-                    <td>{{ $leader->created_at }}</td>
+                    <td>
+                        @if($pledge->status == 'Imekamilika')
+                            <span class="badge text-bg-success rounded-full">Imekamilika</span>
+                        @else
+                            <span class="badge text-bg-danger rounded-full">Haijakamilika</span>
+                        @endif
+                    </td>
+                    <td>{{ $pledge->created_at }}</td>
                     <td class="text-center">
                         <div class="dropdown">
                             <button class="my-dropbtn btn btn-transparent border-0 dropdown-toggle shadow-none"
@@ -176,19 +186,19 @@
                             <ul class="dropdown-menu" style="z-index: 1000;">
                                 <li>
                                     <button type="button" class="dropdown-item text-secondary" data-bs-toggle="modal"
-                                            data-bs-target="#viewLeaderModal{{ $leader->id }}" style="cursor: pointer;">
+                                            data-bs-target="#viewPledgeModal{{ $pledge->id }}" style="cursor: pointer;">
                                         <i class="bi bi-eye-fill me-1"></i> Tazama
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="dropdown-item text-success" data-bs-toggle="modal"
-                                            data-bs-target="#editLeaderModal{{ $leader->id }}" style="cursor: pointer;">
+                                            data-bs-target="#editPledgeModal{{ $pledge->id }}" style="cursor: pointer;">
                                         <i class="bi bi-pen-fill me-1"></i> Hariri
                                     </button>
                                 </li>
                                 <li>
                                     <button type="button" class="dropdown-item text-danger" style="cursor: pointer;"
-                                            data-bs-toggle="modal" data-bs-target="#deleteLeaderModal{{ $leader->id }}">
+                                            data-bs-toggle="modal" data-bs-target="#deletePledgeModal{{ $pledge->id }}">
                                         <i class="bi bi-trash-fill me-1"></i> Futa
                                     </button>
                                 </li>
@@ -199,7 +209,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="10">
+                    <td colspan="12">
                         <div class="d-flex align-items-center justify-content-center py-3">
                             <i class="bi bi-inbox fs-2 text-muted"></i>
                             <span class="text-muted mx-3">Hakuna majibu ya '{{ $search }}' </span>
@@ -211,14 +221,14 @@
         </table>
 
 
-        @if($leaders->count() > 0)
+        @if($pledges->count() > 0)
             <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap">
                 <div class="text-muted small mb-2">
-                    Ukurasa {{ $leaders->currentPage() }} ya {{ $leaders->lastPage() }} | Jumla ya
-                    Viongozi: {{ $leaders->total() }}
+                    Ukurasa {{ $pledges->currentPage() }} ya {{ $pledges->lastPage() }} | Jumla ya
+                    Ahadi: {{ $pledges->total() }}
                 </div>
                 <nav aria-label="Page navigation">
-                    {{ $leaders->links('vendor.pagination.custom-bootstrap') }}
+                    {{ $pledges->links('vendor.pagination.custom-bootstrap') }}
                 </nav>
             </div>
         @else
@@ -228,62 +238,82 @@
     </div>
 
 
-    <!-- Modal - ADMIN LEADER VIEW -->
-    @foreach($leaders as $leader)
-        <div class="modal fade" id="viewLeaderModal{{ $leader->id }}" tabindex="-1"
-             aria-labelledby="viewLeaderModal{{ $leader->id }}Label" aria-hidden="true">
+    <!-- Modal - ADMIN Pledge VIEW -->
+    @foreach($pledges as $pledge)
+        <div class="modal fade" id="viewPledgeModal{{ $pledge->id }}" tabindex="-1"
+             aria-labelledby="viewPledgeModal{{ $pledge->id }}Label" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="viewLeaderModal{{ $leader->id }}Label">Tazama Kiongozi</h1>
+                        <h1 class="modal-title fs-5" id="viewPledgeModal{{ $pledge->id }}Label">Tazama Kiongozi</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="member_id" class="form-label">Namba ya Mshirika</label>
-                                    <input type="text" value="{{ $leader->member->member_id }}" class="form-control fw-bold" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="user_id" class="form-label">Alie Kiunda</label>
-                                    <input type="text" value="{{ $leader->user->name .' ('. Str::title($leader->user->user_type) .')' }}" class="form-control fw-bold" readonly>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-5">
                                 <div class="mb-3">
                                     <label for="name" class="form-label">Jina Kamili</label>
-                                    <input type="text" value="{{ $leader->member->firstname .' '. $leader->member->middlename  .' '. $leader->member->lastname }}" class="form-control fw-bold" readonly>
+                                    <input type="text" class="form-control" value="{{ $pledge->member->firstname .' '. $pledge->member->middlename .' '. $pledge->member->lastname  }}" readonly>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="mb-3">
-                                    <label for="position" class="form-label">Nafasi ya Kiongozi</label>
-                                    <input type="text" value="{{ $leader->leaderPosition->name }}" class="form-control fw-bold" readonly>
+                                    <label for="dateOfPledge" class="form-label">Tarehe ya Ahadi</label>
+                                    <input type="date" class="form-control" value="{{ $pledge->pledge_date }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">Tarehe ya Mwisho</label>
+                                    @if ($pledge->end_date == null)
+                                        <input type="text" class="form-control fst-italic text-muted" value="null" readonly>
+                                    @else
+                                        <input type="date" class="form-control" value="{{ $pledge->end_date }}" readonly>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="name" class="form-label">Kikundi</label>
-                                    <input type="text" value="{{ $leader->group->name }}" class="form-control fw-bold" readonly>
+                                    <label for="name" class="form-label">Aina</label>
+                                    <input type="text" class="form-control" value="{{ $pledge->type }}" readonly>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="status" class="form-label">Hali</label>
-                                    <input type="text" value="{{ $leader->status }}" class="form-control fw-bold" readonly>
+                                    <label for="amount" class="form-label">Kiasi (Tshs)</label>
+                                    <input type="text" class="form-control" value="{{ number_format((float) $pledge->amount, 2) }}" readonly>
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="created_at" class="form-label">Tarehe ya Kuundwa</label>
-                            <input type="text" value="{{ $leader->created_at }}" class="form-control fw-bold" readonly>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Kilichotolewa (Tshs)({{ ($pledge->fulfilled_amount/$pledge->amount) * 100 }}%)</label>
+                                    <input type="text" class="form-control" value="{{ number_format((float) $pledge->fulfilled_amount, 2) }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dateOfPledge" class="form-label">Kilichobaki (Tshs)</label>
+                                    <input type="text" class="form-control" value="{{ number_format((float) ($pledge->amount - $pledge->fulfilled_amount), 2) }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Tarehe ya Kuundwa</label>
+                                    <input type="date" class="form-control" value="{{ $pledge->created_at }}" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dateOfPledge" class="form-label">Hali</label>
+                                    <input type="text" class="form-control" value="{{ $pledge->status }}" readonly>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -296,78 +326,26 @@
 
 
 
-    <!-- Modal - ADMIN LEADER EDIT -->
-    @foreach($leaders as $leader)
-        <div class="modal fade" id="editLeaderModal{{ $leader->id }}" tabindex="-1"
-             aria-labelledby="editLeaderModal{{ $leader->id }}Label" aria-hidden="true">
+    <!-- Modal - ADMIN Pledge EDIT -->
+    @foreach($pledges as $pledge)
+        <div class="modal fade" id="editPledgeModal{{ $pledge->id }}" tabindex="-1"
+             aria-labelledby="editPledgeModal{{ $pledge->id }}Label" aria-hidden="true">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <form action="{{ route('admin.edit.leader') }}" method="POST" x-data="{ loading: false }"
+                    <form action="{{ route('admin.edit.pledge') }}" method="POST" x-data="{ loading: false }"
                           @submit.prevent="loading = true; $el.submit()">
                         @csrf
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="editLeaderModal{{ $leader->id }}Label">Hariri Kiongozi</h1>
+                            <h1 class="modal-title fs-5" id="editPledgeModal{{ $pledge->id }}Label">Hariri Kiongozi</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <input type="text" value="{{ $leader->id }}" name="id" hidden>
-                            <input type="text" value="{{ $leader->user_id }}" name="user_id" class="form-control" hidden>
+                            <input type="text" value="{{ $pledge->id }}" name="id" hidden>
+                            <input type="text" value="{{ $pledge->user_id }}" name="user_id" class="form-control" hidden>
 
-                            <livewire:update-check-member-id :leader-id="$leader->id" />
+                            {{-- <livewire:update-check-member-id :pledge-id="$pledge->id" /> --}}
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="leader_position_id" class="form-label">Nafasi ya Mshirika</label>
-                                        <select name="leader_position_id" id="leader_position_id" class="form-select">
-                                            <option value="">--chagua nafasi--</option>
-                                            @foreach($leaderPositions as $position)
-                                                @if($leader->leader_position_id == $position->id)
-                                                    <option value="{{ $position->id }}" selected>{{ $position->name }}</option>
-                                                @else
-                                                    <option value="{{ $position->id }}">{{ $position->name }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('leader_position_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="group_id" class="form-label">Kikundi</label>
-                                        <select name="group_id" id="group_id" class="form-select">
-                                            <option value="">--chagua kikundi--</option>
-                                            @foreach($groups as $group)
-                                                @if($leader->group_id == $group->id)
-                                                    <option value="{{ $group->id }}" selected>{{ $group->name }}</option>
-                                                @else
-                                                    <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                                @endif
-                                            @endforeach
-                                        </select>
-                                        @error('group_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="status" class="form-label">Hali</label>
-                                <select name="status" id="status" class="form-select">
-                                    @if($leader->status == 'Hai')
-                                        <option value="">-- chagua hali --</option>
-                                        <option value="Hai" selected>Hai</option>
-                                        <option value="Siohai">Siohai</option>
-                                    @elseif($leader->status == 'Siohai')
-                                        <option>-- chagua hali --</option>
-                                        <option value="Hai">Hai</option>
-                                        <option value="Siohai" selected>Siohai</option>
-                                    @else
-                                        <option value="" selected>-- chagua hali --</option>
-                                        <option value="Hai">Hai</option>
-                                        <option value="Siohai">Siohai</option>
-                                    @endif
-                                </select>
-                                @error('status') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
+                           
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
@@ -389,22 +367,22 @@
 
 
     <!-- Modal - ADMIN USER DELETE -->
-    @foreach($leaders as $leader)
-        <div class="modal fade" id="deleteLeaderModal{{ $leader->id }}" tabindex="-1"
-             aria-labelledby="deleteLeaderModal{{ $leader->id }}Label" aria-hidden="true">
+    @foreach($pledges as $pledge)
+        <div class="modal fade" id="deletePledgeModal{{ $pledge->id }}" tabindex="-1"
+             aria-labelledby="deletePledgeModal{{ $pledge->id }}Label" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header border-o">
-                        <h1 class="modal-title fs-5" id="deleteLeaderModal{{ $leader->id }}Label">Futa Kiongozi</h1>
+                        <h1 class="modal-title fs-5" id="deletePledgeModal{{ $pledge->id }}Label">Futa Kiongozi</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <p>Unauwakika wa kumfuta kiongozi huyu mwenye jina <span
-                                class="fst-italic text-success">{{ '#' . $leader->member->firstname .' '. $leader->member->middlename .' '. $leader->member->lastname }}</span>?</p>
+                                class="fst-italic text-success">{{ '#' . $pledge->member->firstname .' '. $pledge->member->middlename .' '. $pledge->member->lastname }}</span>?</p>
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
-                        <form method="GET" action="{{ route('admin.delete.leader', $leader->id) }}"
+                        <form method="GET" action="{{ route('admin.delete.pledge', $pledge->id) }}"
                               x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
                             <button type="submit"
                                     class="btn btn-danger d-flex align-items-center justify-content-center gap-2"
@@ -423,41 +401,41 @@
 
 
 
-    <!-- Modal - ADMIN DELETE SELECTED LEADERS -->
-    <div class="modal fade" id="deleteSelectedLeaderModal" tabindex="-1" aria-labelledby="deleteSelectedLeaderModalLabel"
+    <!-- Modal - ADMIN DELETE SELECTED PledgeS -->
+    <div class="modal fade" id="deleteSelectedPledgeModal" tabindex="-1" aria-labelledby="deleteSelectedPledgeModalLabel"
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header border-o">
-                    <h1 class="modal-title fs-5" id="deleteSelectedLeaderModalLabel">
-                        @if(count($selectedLeaders) > 1)
-                            Futa Viongozi
-                        @elseif(count($selectedLeaders) == 1)
+                    <h1 class="modal-title fs-5" id="deleteSelectedPledgeModalLabel">
+                        @if(count($selectedPledges) > 1)
+                            Futa Ahadi
+                        @elseif(count($selectedPledges) == 1)
                             Futa Kiongozi
                         @endif
                     </h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if(count($selectedLeaders) > 1)
-                        <p>Unauwakika wa kufuta viongozi hawa?</span>?</p>
-                    @elseif(count($selectedLeaders) == 1)
+                    @if(count($selectedPledges) > 1)
+                        <p>Unauwakika wa kufuta Ahadi hawa?</span>?</p>
+                    @elseif(count($selectedPledges) == 1)
                         <p>Unauwakika wa kumfuta kiongozi huyu?</span>?</p>
                     @endif
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
                     <form x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
-                        <button type="submit" wire:click="deleteSelectedLeaders"
+                        <button type="submit" wire:click="deleteSelectedPledges"
                                 class="btn btn-danger d-flex align-items-center justify-content-center gap-2"
                                 :disabled="loading">
                             <!-- Spinner shown only when loading -->
                             <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
                                   aria-hidden="true"></span>
                             <span>
-                                @if(count($selectedLeaders) > 1)
+                                @if(count($selectedPledges) > 1)
                                     Futa Viongozi
-                                @elseif(count($selectedLeaders) == 1)
+                                @elseif(count($selectedPledges) == 1)
                                     Futa Kiongozi
                                 @endif
                                 </span>

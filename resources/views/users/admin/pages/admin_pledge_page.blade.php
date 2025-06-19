@@ -1,7 +1,12 @@
+@php
+    use Illuminate\Support\Carbon;
+    use App\Models\Pledge;
+@endphp
+
 @include('includes.dashboardHeader')
 @include('includes.notifications_alert')
 
-<title> Mfumo wa Parokia | Washarika</title>
+<title> Mfumo wa Parokia | Ahadi</title>
 
 
 <!--begin::Body-->
@@ -40,7 +45,6 @@
                 <!--begin::End Navbar Links-->
 
                 <ul class="navbar-nav ms-auto">
-
                     <!--begin::Fullscreen Toggle-->
                     <li class="nav-item">
                         <a class="nav-link" href="#" data-lte-toggle="fullscreen">
@@ -169,7 +173,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('admin.pledges.page') }}" class="nav-link">
+                                    <a href="{{ route('admin.pledges.page') }}" class="nav-link active">
                                         <span class="mx-3"></span>
                                         <i class="bi bi-journal-check"></i>
                                         <p>
@@ -191,7 +195,7 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('admin.members.page') }}" class="nav-link active">
+                                    <a href="{{ route('admin.members.page') }}" class="nav-link">
                                         <span class="mx-3"></span>
                                         <i class="bi bi-person-fill"></i>
                                         <p>
@@ -272,6 +276,8 @@
                         </li>
 
 
+
+
                         <li class="nav-item">
                             <a href="{{ route('admin.profile.page') }}" class="nav-link">
                                 <span
@@ -305,16 +311,15 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <ol class="breadcrumb">
-                                <li class="breadcrumb-item fs-6">Washirika</li>
+                                <li class="breadcrumb-item fs-6">Ahadi</li>
                                 <li class="breadcrumb-item active fs-6" aria-current="page">Orodha</li>
                             </ol>
-                            <h3 class="mb-0 float-bold">Washirika</h3>
+                            <h3 class="mb-0 float-bold">Ahadi</h3>
                         </div>
                         <div class="col-sm-6">
                             <div style="padding: 14px 0"></div>
                             <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal"
-                                data-bs-target="#addMemberModal"> Ongeza Mshirika
-                            </button>
+                                data-bs-target="#addPledgeModal"> Ongeza Ahadi</button>
                         </div>
                     </div>
                     <!--end::Row-->
@@ -331,18 +336,19 @@
                     <!--begin::Row-->
                     <div class="row">
                         <div class="card p-3 rounded-2">
-                            @if (count($members) == 0)
+                            @if ($pledges->isEmpty())
                                 <div class="container p-5 d-flex flex-column align-items-center justify-content-center"
                                     style="background-color: #cccccc20;">
                                     <x-heroicon-o-inbox class="text-danger mb-4" style="height: 50px; width: 50px;" />
-                                    <h5 class="fw-semibold fst-italic fs-6">Washirika Hakuna, Jaribu Kuongeza</h5>
+                                    <h5 class="fw-semibold fst-italic fs-6">Vikundi Hakuna, Jaribu Kuongeza</h5>
                                 </div>
                             @else
-                                <livewire:members-table />
+                                <livewire:pledge-table />
                             @endif
                         </div>
                     </div>
                     <!-- /.row (main row) -->
+
 
                 </div>
                 <!--end::Container-->
@@ -367,122 +373,48 @@
     <!--end::App Wrapper-->
 
 
-    <!-- Modal - ADMIN MANY MEMBER REGISTER -->
-    <div class="modal fade" id="addManyMemberModal" tabindex="-1" aria-labelledby="addManyMemberModalLabel"
+    <!-- Modal - ADMIN USER REGISTER -->
+    <div class="modal fade" id="addPledgeModal" tabindex="-1" aria-labelledby="addPledgeModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="{{ route('admin.addManyMembers') }}" method="POST" enctype="multipart/form-data"
-                    x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
+                <form action="{{ route('admin.add.pledge') }}" method="POST" x-data="{ loading: false }"
+                    @submit.prevent="loading = true; $el.submit()">
                     @csrf
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="addManyMemberModalLabel">Ongeza Washirika | Excel</h1>
+                        <h1 class="modal-title fs-5" id="addPledgeModalLabel">Ongeza Ahadi</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                             aria-label="Close"></button>
                     </div>
-
-                    <div class="modal-body">
-                        <p class="text-secondary-emphasis pb-3">Box la chini ni Mfano wa fomu ya Excel yenye mpangilio
-                            Unaotakiwa. Usipo ufata hitilafi zitatokea</p>
-                        <livewire:many-members-excel-download />
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
-                        <button type="submit"
-                            class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
-                            :disabled="loading">
-                            <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
-                                aria-hidden="true"></span>
-                            <span>Ongeza Washirika</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Modal - ADMIN MEMBER REGISTER -->
-    <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <form action="{{ route('addMember') }}" method="POST" x-data="{ loading: false }"
-                    @submit.prevent="loading = true; $el.submit()">
-                    @csrf
-                    <div class="modal-header d-flex justify-content-between align-items-center">
-                        <h1 class="modal-title fs-5" id="addMemberModalLabel">Ongeza Mshirika</h1>
-                        <div class="d-flex align-items-center gap-2">
-                            <button type="button" class="btn btn-success addManyBtn" data-bs-dismiss="modal"
-                                aria-label="Close" data-bs-toggle="modal" data-bs-target="#addManyMemberModal">
-                                <i class="bi bi-file-earmark-excel-fill"></i> Ongeza Wengi
-                            </button>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Close"></button>
-                        </div>
-                    </div>
-
-
                     <div class="modal-body">
                         <input type="hidden" name="user_id" value="{{ $user->id }}">
+
                         <div class="row">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="member_id" class="form-label">Namba ya Mshirika</label>
-                                    <input type="text" id="member_id" value="{{ old('member_id') }}"
-                                        class="form-control" placeholder="Ingiza Namba ya Mshirika" name="member_id">
-                                    @error('member_id')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
+                                <livewire:check-member-id />
                             </div>
                             <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="switchCheckDefault" class="form-label">Ni Mgeni?</label>
-                                        <div class="d-flex align-items-center gap-2 flex-wrap mx-3">
-                                            <div class="form-check form-switch">
-                                                <input name="is_guest" class="form-check-input fs-4" type="checkbox"
-                                                    role="switch" id="switchCheckDefault">
-                                            </div>
-                                            <small class="text-muted fst-italic">
-                                                Ikiwa imewaka basi <b>Ni-mgeni</b>, laasivyo sio
-                                            </small>
-                                        </div>
-                                        @error('is_guest')
-                                            <span class="text-danger">{{ $message }}</span>
-                                        @enderror
-                                    </div>
+                                <div class="mb-3">
+                                    <label for="is_guest" class="form-label">Ni Mgeni?</label>
+                                    <input type="checkbox" class="form-check" value="">
                                 </div>
+                            </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="firstname" class="form-label">Jina la Kwanza</label>
-                                    <input type="text" id="firstname" value="{{ old('firstname') }}"
-                                        class="form-control" placeholder="Ingiza Jina la Kwanza" name="firstname">
+                                    <label for="firstname" class="form-label">Jina La Kwanza</label>
+                                    <input type="text" class="form-control" name="firstname" id="firstname" value="{{ old('firstname') }}" placeholder="Ingiza Jina la Kwanza">
                                     @error('firstname')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="middlename" class="form-label">Jina la Kati</label>
-                                    <input type="text" id="middlename" value="{{ old('middlename') }}"
-                                        class="form-control" placeholder="Ingiza Jina la Kati" name="middlename">
-                                    @error('middlename')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="lastname" class="form-label">Jina la Mwisho</label>
-                                    <input type="text" id="lastname" value="{{ old('lastname') }}"
-                                        class="form-control" placeholder="Ingiza Jina la Mwisho" name="lastname">
+                                    <label for="lastname" class="form-label">Jina La Mwisho</label>
+                                    <input type="text" class="form-control" name="lastname" id="lastname" value="{{ old('lastname') }}" placeholder="Ingiza Jina la Mwisho">
                                     @error('lastname')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -491,36 +423,22 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="phone" class="form-label">Namba ya Simu</label>
-                                    <input type="text" value="{{ old('phone') }}" id="phone"
-                                        class="form-control" placeholder="Ingiza Namba ya Simu" name="phone">
+                                    <input type="text" class="form-control" name="phone" id="phone" value="{{ old('phone') }}"
+                                        placeholder="Ingiza namba ya simu..">
                                     @error('phone')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="dateOfBirth" class="form-label">Tarehe ya Kuzaliwa</label>
-                                    <input type="date" value="{{ old('dateOfBirth') }}" id="dateOfBirth"
-                                        class="form-control" placeholder="Ingiza Tarehe ya Kuzaliwa"
-                                        name="dateOfBirth">
-                                    @error('dateOfBirth')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="sex" class="form-label">Jinsia</label>
-                                    <select name="sex" id="sex" class="form-select">
-                                        <option value="" selected>-- chagua jinsia --</option>
-                                        <option value="ME">ME</option>
-                                        <option value="KE">KE</option>
-                                    </select>
-                                    @error('sex')
+                                    <label for="amount" class="form-label">Kiasi</label>
+                                    <input type="number" class="form-control" name="amount" id="amount" value="{{ old('amount') }}"
+                                        placeholder="Ingiza kiasi.." min="0">
+                                    @error('amount')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
@@ -528,43 +446,72 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="street" class="form-label">Mtaa</label>
-                                    <input type="text" value="{{ old('street') }}" id="street"
-                                        class="form-control" placeholder="Ingiza Mtaa" name="street">
-                                    @error('street')
+                                    <label for="fulfilled_amount" class="form-label">Kilichotolewa</label>
+                                    <input type="number" class="form-control" name="fulfilled_amount" id="fulfilled_amount"
+                                        value="{{ old('fulfilled_amount', 0) }}"
+                                        placeholder="Ingiza kiasi kilichotolewa.." min="0">
+                                    @error('fulfilled_amount')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="ambassador" class="form-label">Balozi</label>
-                                    <input type="text" value="{{ old('ambassador') }}" id="ambassador"
-                                        class="form-control" placeholder="Ingiza Balozi" name="ambassador">
-                                    @error('ambassador')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    <label for="group_id" class="form-label">Kikundi</label>
-                                    <select name="group_id" id="group_id" class="form-select">
-                                        <option value="" selected>-- chagua kikundi --</option>
-                                        @foreach ($groups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('group_id')
+                                    <label for="pledge_date" class="form-label">Tarehe ya Ahadi</label>
+                                    <input type="date" class="form-control" name="pledge_date" id="pledge_date"
+                                        value="{{ old('pledge_date', Carbon::now()) }}"
+                                        placeholder="Tarehe ya Ahadi..">
+                                    @error('pledge_date')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_date" class="form-label">Tarehe ya Mwisho <span class="text-muted fst-italic"> *(Sio lazima uweke)</span></label>
+                                    <input type="date" class="form-control" name="end_date" id="end_date"
+                                        value="{{ old('end_date') }}" placeholder="Tarehe ya Mwisho..">
+                                    @error('end_date')
+                                        <span class="text-danger">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="type" class="form-label">Aina ya Ahadi</label>
+                                <select name="type" id="type" class="form-select">
+                                    <option value="">-- chagua aina ya ahadi --</option>
+                                    @foreach (Pledge::types() as $value => $label)
+                                        <option value="{{ $value }}" {{ old('type') == $value ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('type')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Hali</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">-- chagua hali --</option>
+                                <option value="Imekamilika" {{ old('status') == 'Imekamilika' ? 'selected' : '' }}>
+                                    Imekamilika</option>
+                                <option value="Haijakamilika"
+                                    {{ old('status') == 'Haijakamilika' ? 'selected' : '' }}>Haijakamilika</option>
+                            </select>
+                            @error('status')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                    </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
                         <button type="submit"
@@ -573,7 +520,7 @@
                             <!-- Spinner shown only when loading -->
                             <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
                                 aria-hidden="true"></span>
-                            <span>Ongeza Mshirika</span>
+                            <span>Ongeza Ahadi</span>
                         </button>
                     </div>
                 </form>

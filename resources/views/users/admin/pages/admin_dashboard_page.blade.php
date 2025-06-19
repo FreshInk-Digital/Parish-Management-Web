@@ -55,14 +55,15 @@
                             </span>
                             <p class="d-flex flex-column align-items-start text-light mx-2" style="margin-bottom: 10px;">
                                 {{ $user->name }}
-                                <small style="color: rgba(245,245,245,0.7);">{{ $user->user_type  }}</small>
+                                <small style="color: rgba(245,245,245,0.7);">{{ Str::title($user->user_type)   }}</small>
                             </p>
                         </li>
                         <!--end::User Image-->
 
+                        
                         <!--begin::Menu Footer-->
                         <li class="user-footer bg-black pb-3" style="border-top: 1px solid #cccccc40">
-                            <a href="#" class="btn btn-dark btn-flat text-white">
+                            <a href="{{ route('admin.profile.page') }}" class="btn btn-dark btn-flat text-white">
                                 <x-heroicon-m-user style="width: 20px; height: 20px;" />
                                 Wasifu
                             </a>
@@ -139,18 +140,27 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.attendance.donation.page') }}" class="nav-link">
                                     <span class="mx-3"></span>
-                                    <i class="bi bi-pin-fill"></i>
+                                    <i class="bi bi-cash-coin"></i>
                                     <p>
-                                        Maudhuria
-                                        {{-- <span class="nav-badge badge text-bg-success me-2">{{ $leaders->count() }}</span>--}}
+                                        Maudhuria/Sadaka
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.pledges.page') }}" class="nav-link">
+                                    <span class="mx-3"></span>
+                                    <i class="bi bi-journal-check"></i>
+                                    <p>
+                                        Ahadi
                                     </p>
                                 </a>
                             </li>
                         </ul>
                     </li>
 
+                    
                     {{-- KATIBU --}}
                     <li class="nav-item menu-open">
                         <a href="#" class="nav-link">
@@ -198,11 +208,21 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#" class="nav-link">
+                                <a href="{{ route('admin.announcements.page') }}" class="nav-link">
                                     <span class="mx-3"></span>
                                     <i class="bi bi-megaphone-fill"></i>
                                     <p>
                                         Matangazo
+                                    </p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('admin.baptisms.page') }}" class="nav-link">
+                                    <span class="mx-3"></span>
+                                    <i class="bi bi-stars"></i>
+                                    <p>
+                                        Ubatizo
+                                        <span class="nav-badge badge text-bg-success me-2">{{ $baptisms->count()  }}</span>
                                     </p>
                                 </a>
                             </li>
@@ -235,7 +255,7 @@
 
 
                     <li class="nav-item">
-                        <a href="{{ route('admin.view.users.page') }}" class="nav-link">
+                        <a href="{{ route('admin.profile.page') }}" class="nav-link">
                             <span class="bg-dark rounded-circle text-light fw-bold d-flex justify-content-center align-items-center"
                                   style="width: 25px; height: 25px; font-size: 10px;">
                                 {{ Str::limit($user->firstname, 1, '') }}{{ Str::limit($user->lastname, 1, '') }}
@@ -310,12 +330,14 @@
                         <!--begin::Small Box Widget 2-->
                         <div class="small-box text-bg-success">
                             <div class="inner">
-                                <h3>{{ 0 }}</h3>
+                                <h3>{{ $attendanceDonations->count() }}</h3>
                                 <p>Mahudhurio na Sadaka</p>
                             </div>
+
                             <x-heroicon-m-currency-dollar class="small-box-icon" fill="currentColor"
                                                          viewBox="0 0 22 22"/>
-                            <a href="{{ route('admin.view.users.page') }}"
+                                                         
+                            <a href="{{ route('admin.attendance.donation.page') }}"
                                class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-arrow-right"></i>
                             </a>
@@ -328,12 +350,14 @@
                         <!--begin::Small Box Widget 2-->
                         <div class="small-box text-bg-danger">
                             <div class="inner">
-                                <h3>{{ 0 }}</h3>
+                                <h3>{{ $pledges->count() }}</h3>
                                 <p>Ahadi</p>
                             </div>
-                            <x-heroicon-m-banknotes class="small-box-icon" fill="currentColor"
+                            
+                            <x-heroicon-m-clipboard-document-list class="small-box-icon" fill="currentColor"
                                                           viewBox="0 0 22 22"/>
-                            <a href="{{ route('admin.view.users.page') }}"
+                                                          
+                            <a href="{{ route('admin.pledges.page') }}"
                                class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover">
                                 More info <i class="bi bi-arrow-right"></i>
                             </a>
@@ -425,7 +449,7 @@
                             </div>
                             <x-heroicon-m-megaphone class="small-box-icon" style="color: #9eeaf920;" fill="currentColor"
                                                  viewBox="0 0 22 22"/>
-                            <a href="#"
+                            <a href="{{ route('admin.announcements.page') }}"
                                class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover" style="border-top: 1px solid #ccc2a420;">
                                 More info <i class="bi bi-arrow-right"></i>
                             </a>

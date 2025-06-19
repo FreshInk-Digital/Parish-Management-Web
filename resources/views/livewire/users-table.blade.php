@@ -248,10 +248,12 @@
                                 </div>
                             </div>
                         </div>
+                    
                         <div class="mb-3">
                             <label for="created_at" class="form-label">Tarehe ya Kuundwa</label>
                             <input type="text"  value="{{ $user->created_at }}" class="form-control fw-bold" readonly>
                         </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Funga</button>
@@ -260,6 +262,8 @@
             </div>
         </div>
     @endforeach
+
+
 
     <!-- Modal - ADMIN USER EDIT -->
     @foreach($users as $user)
@@ -306,7 +310,13 @@
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label for="user_type" class="form-label">Aina ya Mhusika</label>
-                                        <select class="form-select" name="user_type">
+                                        <select name="user_type" id="user_type" class="form-select">
+                                            <option value="" >-- chagua aina ya mhusika --</option>
+                                            @foreach (\App\Models\User::types() as $value => $type)
+                                                <option value="{{  $value }}" {{ old('type', $user->user_type) == $value ? 'selected' : '' }} >{{ $type }}</option>
+                                            @endforeach
+                                        </select>
+                                        {{-- <select class="form-select" name="user_type">
                                             @if($user->user_type == 'admin')
                                                 <option value="">-- chagua Aina ya Mhusika --</option>
                                                 <option value="admin" selected>Admin</option>
@@ -338,7 +348,7 @@
                                                 <option value="katibu">Katibu</option>
                                                 <option value="mwasibu">Mwasibu</option>
                                             @endif
-                                        </select>
+                                        </select> --}}
                                         @error('user_type') <span class="text-danger">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -346,7 +356,7 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
-                            {{--                    <button type="submit" class="btn btn-primary">Ongeza Mhusika</button>--}}
+                            {{-- <button type="submit" class="btn btn-primary">Ongeza Mhusika</button>--}}
                             <button type="submit"
                                     class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
                                     :disabled="loading">
@@ -362,6 +372,9 @@
         </div>
     @endforeach
 {{--    data-bs-toggle="modal" data-bs-target="#deleteSelectedUserModal"--}}
+
+
+
 
     <!-- Modal - ADMIN USER DELETE -->
     @foreach($users as $user)
@@ -392,6 +405,9 @@
             </div>
         </div>
     @endforeach
+
+
+
 
     <!-- Modal - ADMIN DELETE SELECTED USERS -->
     <div class="modal fade" id="deleteSelectedUserModal" tabindex="-1" aria-labelledby="deleteSelectedUserModalLabel" aria-hidden="true">
@@ -436,5 +452,6 @@
                 </div>
             </div>
         </div>
+        
 </div>
 

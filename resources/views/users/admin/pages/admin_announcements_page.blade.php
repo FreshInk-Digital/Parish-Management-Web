@@ -1,7 +1,7 @@
 @include('includes.dashboardHeader')
 @include('includes.notifications_alert')
 
-<title> Mfumo wa Parokia | Viongozi</title>
+<title> Mfumo wa Parokia | Matangazo</title>
 
 
 <!--begin::Body-->
@@ -50,6 +50,8 @@
                 </li>
                 <!--end::Fullscreen Toggle-->
 
+
+
                 <!--begin::User Menu Dropdown-->
                 <li class="nav-item dropdown user-menu">
                     <a href="#" class="nav-link dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown">
@@ -68,7 +70,7 @@
                             </span>
                             <p class="d-flex flex-column align-items-start text-light mx-2" style="margin-bottom: 10px;">
                                 {{ $user->name }}
-                                <small style="color: rgba(245,245,245,0.7);">{{ $user->user_type }}</small>
+                                <small style="color: rgba(245,245,245,0.7);">{{ Str::title($user->user_type)  }}</small>
                             </p>
                         </li>
                         <!--end::User Image-->
@@ -192,7 +194,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.leaders.page') }}" class="nav-link active">
+                                <a href="{{ route('admin.leaders.page') }}" class="nav-link">
                                     <span class="mx-3"></span>
                                     <i class="bi bi-briefcase-fill"></i>
                                     <p>
@@ -219,7 +221,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="{{ route('admin.announcements.page') }}" class="nav-link">
+                                <a href="{{ route('admin.announcements.page') }}" class="nav-link active">
                                     <span class="mx-3"></span>
                                     <i class="bi bi-megaphone-fill"></i>
                                     <p>
@@ -297,14 +299,14 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <ol class="breadcrumb">
-                            <li class="breadcrumb-item fs-6">Viongozi</li>
+                            <li class="breadcrumb-item fs-6">Matangazo</li>
                             <li class="breadcrumb-item active fs-6" aria-current="page">Orodha</li>
                         </ol>
-                        <h3 class="mb-0 float-bold">Viongozi</h3>
+                        <h3 class="mb-0 float-bold">Matangazo</h3>
                     </div>
                     <div class="col-sm-6">
                         <div style="padding: 14px 0"></div>
-                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addLeaderModal"> Ongeza Kiongozi</button>
+                        <button type="button" class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addAnnouncementModal">Ongeza Tangazo</button>
                     </div>
                 </div>
                 <!--end::Row-->
@@ -321,13 +323,13 @@
                 <!--begin::Row-->
                 <div class="row">
                     <div class="card p-3 rounded-2">
-                        @if($leaders->isEmpty())
+                        @if($announcements->isEmpty())
                             <div class="container p-5 d-flex flex-column align-items-center justify-content-center" style="background-color: #cccccc20;">
                                 <x-heroicon-o-inbox class="text-danger mb-4" style="height: 50px; width: 50px;" />
-                                <h5 class="fw-semibold fst-italic fs-6">Viongozi Hakuna, Jaribu Kuongeza</h5>
+                                <h5 class="fw-semibold fst-italic fs-6">Matangazo Hakuna, Jaribu Kuongeza</h5>
                             </div>
                         @else
-                            <livewire:leaders-table />
+                            <livewire:announcements-table />
                         @endif
                     </div>
                 </div>
@@ -352,74 +354,65 @@
     </footer>
     <!--end::Footer-->
 
-    <!-- Modal - ADMIN LEADER REGISTER -->
-    <div class="modal fade" id="addLeaderModal" tabindex="-1" aria-labelledby="addLeaderModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <form action="{{ route('admin.add.leader') }}" method="POST" x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
-                    @csrf
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="addLeaderModalLabel">Ongeza Kiongozi</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="user_id" value="{{ $user->id }}">
-
-                        <livewire:check-member-id />
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="leader_position_id" class="form-label">Nafasi ya Kiongozi</label>
-                                    <select name="leader_position_id" id="leader_position_id" class="form-select">
-                                        <option value="">--chagua nafasi--</option>
-                                        @foreach($leaderPositions as $position)
-                                            <option value="{{ $position->id }}">{{ $position->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('leader_position_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="group_id" class="form-label">Kikundi</label>
-                                    <select name="group_id" id="group_id" class="form-select">
-                                        <option value="">--chagua kikundi--</option>
-                                        @foreach($groups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('group_id') <span class="text-danger">{{ $message }}</span> @enderror
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Hali</label>
-                            <select name="status" id="status" class="form-select">
-                                <option value="">-- chagua hali --</option>
-                                <option value="Hai">Hai</option>
-                                <option value="Siohai">Siohai</option>
-                            </select>
-                            @error('status') <span class="text-danger">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
-                        <button type="submit"
-                                class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
-                                :disabled="loading">
-                            <!-- Spinner shown only when loading -->
-                            <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
-                                  aria-hidden="true"></span>
-                            <span>Ongeza Kiongozi</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
 </div>
 <!--end::App Wrapper-->
+
+
+<!-- Modal - ADMIN ANNOUNCEMENT REGISTER -->
+<div class="modal fade" id="addAnnouncementModal" tabindex="-1" aria-labelledby="addAnnouncementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{ route('addAnnouncement') }}" method="POST" enctype="multipart/form-data" x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()">
+                @csrf
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="addAnnouncementModalLabel">Ongeza Tangazo</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                    <div class="mb-3">
+                        <label for="announcement_asset" class="form-label">Faili la Tangazo</label>
+                        <input type="file" name="announcement_asset" id="announcement_asset" class="form-control">
+                        @error('announcement_asset')  <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="announcement_type" class="form-label">Aina ya Tangazo</label>
+                        <select name="announcement_type" id="announcement_type" class="form-select">
+                            <option value="">--chagua aina tangazo--</option>
+                            <option value="Ibada ya Kwanza (Jumapili)">Ibada ya Kwanza (Jumapili)</option>
+                            <option value="Ibada ya Pili (Jumapili)">Ibada ya Pili (Jumapili)</option>
+                            <option value="Ibada ya Tatu (Jumapili)">Ibada ya Tatu (Jumapili)</option>
+                            <option value="Ibada ya Nne (Jumapili)">Ibada ya Nne (Jumapili)</option>
+                            <option value="Ibada ya Kawaida">Ibada ya Kawaida</option>
+                            <option value="Tanzia">Tanzia</option>
+                            <option value="Ndoa">Ndoa</option>
+                            <option value="Watoto (Shule ya Jumapili)">Watoto (Shule ya Jumapili)</option>
+                            <option value="Nyumba kwa Nyumba">Nyumba kwa Nyumba</option>
+                            <option value="Nyinginezo">Nyinginezo</option>
+                        </select>
+                        @error('announcement_type') <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Maelezo</label>
+                        <textarea name="description" id="description" placeholder="Ingiza maelezo" class="form-control w-100" style="max-height: 100px; min-height: 50px; height: 70px;"></textarea>
+                        @error('description')  <span class="text-danger">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sitisha</button>
+                    {{--                    <button type="submit" class="btn btn-primary">Ongeza Mhusika</button>--}}
+                    <button type="submit"
+                            class="btn btn-primary d-flex align-items-center justify-content-center gap-2"
+                            :disabled="loading">
+                        <!-- Spinner shown only when loading -->
+                        <span x-show="loading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                        <span>Ongeza Tangazo</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @include('includes.dashboardFooter')

@@ -1,11 +1,22 @@
 @include('includes.header')
+@include('includes.notifications_alert')
 
 <title>Mfumo wa Parokia | Fomu ya Kuingia</title>
 
+<style>
+    /* Custom gray placeholder style */
+    .placeholder-gray::placeholder {
+        color: #b0b0b0 !important;
+        opacity: 1;
+    }
+
+    .text-error {
+        color: #ff5733 !important;
+    }
+</style>
+
 <body class="bg-dark" style="height: 100vh;">
-
-    @include('includes.notifications_alert')
-
+    {{-- @include('includes.notifications_alert') --}}
     <section>
 
         <div class="nav flex items-center justify-start py-3">
@@ -23,14 +34,15 @@
                         <form x-data="{ loading: false }" @submit.prevent="loading = true; $el.submit()"
                             actions="{{ route('userPostLogin') }}" method="POST">
                             @csrf
-                            <!-- Email -->
+
+                            <!-- Phone -->
                             <div class="mb-3">
-                                <label for="email" class="form-label text-white">Barua Pepe</label>
-                                <input type="email"
+                                <label for="phone" class="form-label text-white">Namba ya Simu</label>
+                                <input type="phone"
                                     class="form-control bg-dark text-white border-secondary placeholder-gray"
-                                    id="email" name="email" placeholder="Ingiza barua pepe.."
-                                    value="{{ old('email') }}">
-                                @error('email')
+                                    id="phone" name="phone" placeholder="Ingiza Namba ya simu.."
+                                    value="{{ old('phone') }}">
+                                @error('phone')
                                     <span class="text-error fw-1">
                                         {{ $message }}
                                     </span>
@@ -54,6 +66,7 @@
                                         </template>
                                     </span>
                                 </div>
+    
                                 @error('password')
                                     <span class="text-error fw-1">
                                         {{ $message }}
@@ -61,15 +74,33 @@
                                 @enderror
                             </div>
 
+                            <!-- Confirm Password -->
+                            <div class="mb-3" x-data="{ show: false }">
+                                <label for="confirm_password" class="form-label text-white">Thibitisha Neno Siri</label>
+                                <div class="input-group">
+                                    <input :type="show ? 'text' : 'password'" name="confirm_password"
+                                        class="form-control bg-dark text-white border-secondary placeholder-gray border-end-0"
+                                        id="confirm_password" placeholder="Thibitisha neno siri.." value="{{ old('confirm_password') }}">
+                                    <span class="input-group-text bg-dark text-white border-secondary border-start-0"
+                                        style="cursor: pointer;" @click="show = !show">
+                                        <template x-if="!show">
+                                            <i class="bi bi-eye text-white"></i>
+                                        </template>
+                                        <template x-if="show">
+                                            <i class="bi bi-eye-slash text-white"></i>
+                                        </template>
+                                    </span>
+                                </div>
 
+                                <div class="pt-2" id="text_output"></div>
 
-                            {{--  <!-- File Upload -->
-                        <div class="mb-4">
-                            <label for="file" class="form-label text-white">Upload File</label>
-                            <input class="form-control bg-dark text-white border-secondary" type="file"
-                                id="file">
-                        </div>
-                        --}}
+                                @error('confirm_password')
+                                    <span class="text-error fw-1">
+                                        {{ $message }}
+                                    </span>
+                                @enderror
+                            </div>
+
 
                             <!-- Submit Button -->
                             <div class="d-grid pt-3 pb-4">
@@ -90,18 +121,41 @@
         </div>
     </section>
 
-    <style>
-        /* Custom gray placeholder style */
-        .placeholder-gray::placeholder {
-            color: #b0b0b0 !important;
-            opacity: 1;
-        }
+    <script>
+        const pw = document.getElementById('password');
+        const confirmPw = document.getElementById('confirm_password');
+        const textBox = document.getElementById('text_output');
 
-        .text-error {
-            color: #ff5733 !important;
-        }
-    </style>
-
-
+        confirmPw.addEventListener('input', () => {
+            const pwtext = pw.value;
+            const confirmPwtext = confirmPw.value;
+            
+            if(pwtext == '' && confirmPwtext != ''){
+                textBox.innerHTML = "Ingiza neno siri kwanza";
+                textBox.classList.add("text-error");
+            }
+            else if(pwtext == '' && confirmPwtext == ''){
+                textBox.innerHTML = "";
+                textBox.classList.remove("text-success");
+                textBox.classList.remove("text-error");
+            }
+            else if(pwtext != '' && confirmPwtext == ''){
+                textBox.innerHTML = "";
+                textBox.classList.remove("text-success");
+                textBox.classList.remove("text-error");
+            }
+            else if(pwtext != '' && confirmPwtext != ''){
+                if(pwtext == confirmPwtext){
+                    textBox.innerHTML = "Thibitisho linaendana";
+                    textBox.classList.remove("text-error");
+                    textBox.classList.add("text-success");
+                }else{
+                    textBox.innerHTML = "Neno siri si sahihi";
+                    textBox.classList.remove("text-success");
+                    textBox.classList.add("text-error");
+                }    
+            }
+        });
+    </script>
 
     @include('includes.footer')

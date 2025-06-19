@@ -14,14 +14,15 @@ return new class extends Migration
         Schema::create('baptisms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('father_member_id')->constrained('members')->onDelete('cascade')->onUpdate('cascade');
-            $table->foreignId('mother_member_id')->constrained('members')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('father_member_id')->constrained('members', 'id')->onDelete('cascade')->onUpdate('cascade');
+            $table->foreignId('mother_member_id')->constrained('members', 'id')->onDelete('cascade')->onUpdate('cascade');
             $table->string('baby_firstname');
             $table->string('baby_middlename');
             $table->string('baby_lastname');
             $table->date('dateOfBirth');
             $table->string('age')->nullable();
-            $table->string('status')->default('Active');
+            $table->date('dateOfBaptism')->nullable();
+            $table->string('status')->default('Hai');
             $table->timestamps();
         });
     }

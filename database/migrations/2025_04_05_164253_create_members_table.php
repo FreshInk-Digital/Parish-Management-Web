@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             $table->bigInteger('member_id')->nullable(); // fixed typo
             $table->string('firstname');
+            $table->string('middlename');
             $table->string('lastname');
             $table->string('sex');
             $table->date('dateOfBirth');
@@ -25,7 +26,7 @@ return new class extends Migration
             $table->string('street');
             $table->boolean('is_guest')->nullable(); // fixed method
             $table->foreignId('group_id')->nullable()->constrained('groups')->onDelete('cascade')->onUpdate('cascade'); // fixed foreign key
-            $table->string('status')->default('Active');
+            $table->string('status')->default('Hai');
             $table->timestamps();
         });
     }

@@ -2,30 +2,24 @@
 
 namespace App\Livewire;
 
-use App\Exports\GroupsExport;
-use App\Exports\LeadersExport;
-use App\Models\Group;
-use App\Models\Leader;
-use App\Models\LeaderPosition;
 use App\Models\Member;
+use App\Models\Pledge;
+use Livewire\Component;
+use App\Exports\PledgesExport;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
-use Livewire\Component;
 use Livewire\WithPagination;
 
-class LeadersTable extends Component
+class PledgeTable extends Component
 {
-
     use withPagination;
 
     public $search = '';
     public $perPage = 5;
     public $isSelectedAll = false;
-    public $selectedLeaders = [];
+    public $selectedPledges = [];
     public $selected = [];
     public $authUser;
-    public $groups;
-    public $leaderPositions;
 
     public $inputMemberId = '';
     public $memberNameReturned = '';
@@ -34,8 +28,6 @@ class LeadersTable extends Component
     public function mount()
     {
         $this->authUser = Auth::user();
-        $this->groups = Group::all();
-        $this->leaderPositions = LeaderPosition::all();
     }
 
     public function findMemberId()
@@ -54,68 +46,68 @@ class LeadersTable extends Component
 
     public function toggleSelectedAll()
     {
-        $leaders = Leader::all();
+        $pledges = Pledge::all();
 
         if ($this->isSelectedAll) {
-            $this->selectedLeaders = $leaders->pluck('id')->toArray();
+            $this->selectedPledges = $pledges->pluck('id')->toArray();
         } else {
-            $this->selectedLeaders = [];
+            $this->selectedPledges = [];
         }
     }
 
-    public function deleteSelectedLeaders()
+    public function deleteSelectedPledges()
     {
-        $this->selected = $this->selectedLeaders;
-        Leader::destroy($this->selectedLeaders);
+        $this->selected = $this->selectedPledges;
+        Pledge::destroy($this->selectedPledges);
         $count = count($this->selected);
         $this->selected = [];
-        $this->selectedLeaders = [];
+        $this->selectedPledges = [];
 
         if ($count === 1) {
-            session()->flash('success', 'Kiongozi amefutwa kikamilifu');
+            session()->flash('success', 'Ahadi imefutwa kikamilifu');
         } elseif ($count > 1) {
-            session()->flash('success', 'Viongozi wamefutwa kikamilifu');
+            session()->flash('success', 'Ahadi zimefutwa kikamilifu');
         }
     }
 
     public function generatePdf()
     {
-        $count = count($this->selectedLeaders);
+        $count = count($this->selectedPledges);
 
         if ($count === 0) {
             $data = [
-                'leaders' => Leader::all()
+                'pledges' => Pledge::all()
             ];
         } else {
             $data = [
-                'leaders' => Leader::query()->whereKey($this->selectedLeaders)->get()
+                'pledges' => Pledge::query()->whereKey($this->selectedPledges)->get()
             ];
         }
 
-        $pdf = Pdf::loadView('pdfs.leaders-pdf', $data);
+        $pdf = Pdf::loadView('pdfs.pledges-pdf', $data);
 
         return response()->streamDownload(function () use ($pdf) {
             echo $pdf->stream();
-        }, 'orodha-ya-viongozi.pdf');
+        }, 'orodha-ya-ahadi.pdf');
     }
 
 
     public function exportExcel()
     {
-        $count = count($this->selectedLeaders);
+        $count = count($this->selectedPledges);
         if ($count == 0) {
-            $leaders = Leader::all();
-            $leaderIds = $leaders->pluck('id')->toArray();
-            return (new LeadersExport($leaderIds))->download('orodha-ya-viongozi-excel.xlsx');
+            $pledges = Pledge::all();
+            $PledgeIds = $pledges->pluck('id')->toArray();
+            return (new PledgesExport($PledgeIds))->download('orodha-ya-ahadi-excel.xlsx');
         }
 
-        return (new LeadersExport($this->selectedLeaders))->download('orodha-ya-viongozi-excel.xlsx');
+        return (new PledgesExport($this->selectedPledges))->download('orodha-ya-ahadi-excel.xlsx');
     }
 
     public function render()
     {
-        return view('livewire.leaders-table', [
-            'leaders' => Leader::search($this->search)
+        return view('livewire.pledge-table', [
+            'pledges' => Pledge::search($this->search)
                 ->orderBy('created_at', 'desc')
                 ->paginate($this->perPage),
         ]);
